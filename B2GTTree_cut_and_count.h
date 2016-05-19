@@ -12,7 +12,9 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TH2.h>
-#include "struct_header.h"
+//#include "struct_header.h"
+#include "cut_flow_count.h"
+#include "analysis_plots.h"
 
 
 
@@ -1884,6 +1886,8 @@ public :
    void             fill_plots(analysis_plots* analysis_plot_struct); 
    TCanvas          *c1;
    void             Draw_plots(analysis_plots* analysis_plot_struct); 
+    
+   void             print_cutflow(std::vector<cut_flow_count> cutflow);
 
    bool             Precut(Long64_t jentry);
    std::vector<cut_flow_count>             Precut_cutflow;
@@ -1898,6 +1902,13 @@ public :
 };
 
 #endif
+
+void B2GTTree_cut_and_count::print_cutflow(std::vector<cut_flow_count> cutflow){
+
+      for(int i = 0; i < cutflow.size(); i++){
+          std::cout << "name: " << cutflow[i].cut_name << " cut count: " << cutflow[i].cut_count << std::endl;
+      } 
+}
 
 void B2GTTree_cut_and_count::fill_plots(analysis_plots* analysis_plot_struct){
     analysis_plot_struct->muon_pt->Fill(mu_Pt[0]);
