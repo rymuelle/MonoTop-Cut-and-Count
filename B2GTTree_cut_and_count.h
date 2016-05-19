@@ -12,10 +12,9 @@
 #include <TChain.h>
 #include <TFile.h>
 #include <TH2.h>
-//#include "struct_header.h"
+#include <math.h>
 #include "cut_flow_count.h"
 #include "analysis_plots.h"
-
 
 
 
@@ -1883,25 +1882,46 @@ public :
    virtual void     Init(TTree *tree);
    virtual void     Loop();
 
+   UInt_t           btag_index; //doesn't really work
+
    void             fill_plots(analysis_plots* analysis_plot_struct); 
    TCanvas          *c1;
    void             Draw_plots(analysis_plots* analysis_plot_struct); 
-    
+
    void             print_cutflow(std::vector<cut_flow_count> cutflow);
+
+   Float_t          return_mTW();
 
    bool             Precut(Long64_t jentry);
    std::vector<cut_flow_count>             Precut_cutflow;
    analysis_plots   *PreCut_analysis_plots;
 
    bool             Signal(Long64_t jentry);
+   std::vector<cut_flow_count>             Signal_cutflow;
+   analysis_plots   *Signal_analysis_plots;
    bool             WJet(Long64_t jentry);
+   std::vector<cut_flow_count>             WJet_cutflow;
+   analysis_plots   *WJet_analysis_plots;
    bool             TTBar(Long64_t jentry);
+   std::vector<cut_flow_count>             TTbar_cutflow;
+   analysis_plots   *TTBar_analysis_plots;
    bool             extra(Long64_t jentry);
+   std::vector<cut_flow_count>             extra_cutflow;
+   analysis_plots   *extra_analysis_plots;
+
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
 };
 
 #endif
+
+Float_t B2GTTree_cut_and_count::return_mTW(){
+    Float_t transvers_mass_W;
+    transvers_mass_W = sqrt ( 2 * mu_Pt[0] * mu_Pt[0] * ( 1 - cos ( mu_Phi[0] - met_Phi[0] ) ) );
+
+   return transvers_mass_W; 
+}
+
 
 void B2GTTree_cut_and_count::print_cutflow(std::vector<cut_flow_count> cutflow){
 

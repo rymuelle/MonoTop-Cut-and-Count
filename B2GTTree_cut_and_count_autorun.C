@@ -45,14 +45,16 @@ void B2GTTree_cut_and_count::Loop()
     if(Precut(jentry)){
       //  std::cout << "passed Precut" << std::endl;
         fill_plots(PreCut_analysis_plots);
-        if(Signal(jentry)){
-            //Signal
+        if( 1==1){//Signal(jentry)){
+            fill_plots(Signal_analysis_plots);
         }
         if(WJet(jentry)){
           //w Jet
+            fill_plots(WJet_analysis_plots);
         } 
         if(TTBar(jentry)){
             //ttbar
+            fill_plots(TTBar_analysis_plots);
         } 
         if(extra(jentry)){
             //ttbar
@@ -68,11 +70,13 @@ void B2GTTree_cut_and_count::Loop()
 //  148     m.Precut_cutflow.push_back(cut_flow_count("all events wjet"));
 //  149     m.Precut_cutflow.push_back(cut_flow_count("eactly one muon"));
 //  150     m.Precut_cutflow.push_back(cut_flow_count("leading jet pt > 10 GeV"));
+//  150     m.Precut_cutflow.push_back(cut_flow_count("leading jet pt > 10 GeV"));
 bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
     bool keep_event = false;
     bool no_other_muon_electron = true;
     bool muon_cut = false;
     bool jet_cut = false;
+    bool transvers_mass_cut = false;
 
     //no other leptons  NOT COMPLETED!!!!!!!!! work and shit
     for(int i = 1; i < sizeof(mu_Pt)/sizeof(mu_Pt[0]); i++){
@@ -99,24 +103,42 @@ bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
 
     }
     //jet cuts
-    if( jetAK4_Pt[0] > 70 and abs(jetAK4_Eta[0]) < 2.5 and muon_cut){ 
+    if( jetAK4_Pt[0] > 70 and muon_cut){ 
 
+        int jet_count = 0;
         int bjet_count = 0;
-
+        btag_index = -10;
         for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+    //        if( jetAK4_CSVv2[i] > .5 and jetAK4_Pt[i] > 30 and abs(jetAK4_Eta[i]) < 2.5){
+            if( jetAK4_Pt[i] > 70 and abs(jetAK4_Eta[i]) < 2.4){ 
+                jet_count = jet_count + 1;
+            }
             if( jetAK4_CSVv2[i] > .5 and jetAK4_Pt[i] > 30 and abs(jetAK4_Eta[i]) < 2.5){
                 bjet_count = bjet_count + 1;
+                btag_index = i;
             }
         }
 
-        if(bjet_count ==1){
+        //std::cout << return_mTW() << std::endl;
+        if(bjet_count != 1){
+            btag_index = -10;
+        }
+        
+        if(jet_count >= 1){
             Precut_cutflow[2].iterate();
             jet_cut = true;
         }
-
     }
 
-    if(muon_cut == true and jet_cut == true){
+
+    //transverse mass cut
+    if( return_mTW() > 40 and jet_cut){
+        transvers_mass_cut = true;
+        Precut_cutflow[3].iterate();
+    }
+
+
+    if(muon_cut == true and jet_cut == true and transvers_mass_cut){
         keep_event = true;
     }
     return keep_event;
@@ -124,9 +146,59 @@ bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
 
 bool B2GTTree_cut_and_count::Signal(Long64_t jentry){
     bool keep_event = false;
-    if( mu_Pt[0] > 10){
+    bool exactly_one_bjet = false;
+    bool other_jets = false;
+    bool mTW_above_50 = false;
+    bool delta_phi_muon_bjet = false;
+    bool met = false;
+
+    Signal_cutflow[0].iterate();
+
+    int local_btag_index = -10;
+    //jet cuts
+    int number_bjets = 0;
+    for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+        if(jetAK4_CSVv2[i] > .5 and jetAK4_Pt[i] > 70 and abs(jetAK4_Eta[i]) < 2.5){
+            number_bjets = number_bjets + 1;
+            local_btag_index = i;
+        } else if( jetAK4_Pt[i] > 30 and jetAK4_CSVv2[i] < .5){
+            other_jets = true;
+        }
+    }
+    
+    if(number_bjets == 1){
+        exactly_one_bjet = true;
+        Signal_cutflow[1].iterate();
+    } else {
+        local_btag_index = -10;
+    }
+    if( exactly_one_bjet == true and other_jets == false){
+        Signal_cutflow[2].iterate();
+    }
+
+    //transverse mass
+    if(return_mTW() > 50 and exactly_one_bjet == true /*and other_jets == falsei*/){
+        mTW_above_50 = true;
+        Signal_cutflow[3].iterate();
+    }
+
+    //delta phi
+   if(abs(mu_Phi[0] - jetAK4_Phi[local_btag_index]) < 1.7 and mTW_above_50){
+        delta_phi_muon_bjet = true;
+        Signal_cutflow[4].iterate();
+   }
+
+    if(met_Pt[0] > 100 and delta_phi_muon_bjet){
+        met = true;
+        Signal_cutflow[5].iterate();
+    }
+
+
+    if( exactly_one_bjet and other_jets == false and mTW_above_50 and delta_phi_muon_bjet){
         keep_event = true;
     }
+
+
     return keep_event;
 }
 
