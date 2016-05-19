@@ -1891,6 +1891,7 @@ public :
    void             print_cutflow(std::vector<cut_flow_count> cutflow);
 
    Float_t          return_mTW();
+   static constexpr Float_t          CSVv2M_working_point_76X = 0.800;
 
    bool             Precut(Long64_t jentry);
    std::vector<cut_flow_count>             Precut_cutflow;
@@ -1903,7 +1904,7 @@ public :
    std::vector<cut_flow_count>             WJet_cutflow;
    analysis_plots   *WJet_analysis_plots;
    bool             TTBar(Long64_t jentry);
-   std::vector<cut_flow_count>             TTbar_cutflow;
+   std::vector<cut_flow_count>             TTBar_cutflow;
    analysis_plots   *TTBar_analysis_plots;
    bool             extra(Long64_t jentry);
    std::vector<cut_flow_count>             extra_cutflow;

@@ -45,12 +45,13 @@ void B2GTTree_cut_and_count::Loop()
     if(Precut(jentry)){
       //  std::cout << "passed Precut" << std::endl;
         fill_plots(PreCut_analysis_plots);
-        if( 1==1){//Signal(jentry)){
+        if( Signal(jentry)){
             fill_plots(Signal_analysis_plots);
         }
         if(WJet(jentry)){
           //w Jet
             fill_plots(WJet_analysis_plots);
+            std::cout << "test" << std::endl;
         } 
         if(TTBar(jentry)){
             //ttbar
@@ -113,7 +114,7 @@ bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
             if( jetAK4_Pt[i] > 70 and abs(jetAK4_Eta[i]) < 2.4){ 
                 jet_count = jet_count + 1;
             }
-            if( jetAK4_CSVv2[i] > .5 and jetAK4_Pt[i] > 30 and abs(jetAK4_Eta[i]) < 2.5){
+            if( jetAK4_CSVv2[i] > CSVv2M_working_point_76X  and jetAK4_Pt[i] > 30 and abs(jetAK4_Eta[i]) < 2.5){
                 bjet_count = bjet_count + 1;
                 btag_index = i;
             }
@@ -158,10 +159,10 @@ bool B2GTTree_cut_and_count::Signal(Long64_t jentry){
     //jet cuts
     int number_bjets = 0;
     for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
-        if(jetAK4_CSVv2[i] > .5 and jetAK4_Pt[i] > 70 and abs(jetAK4_Eta[i]) < 2.5){
+        if(jetAK4_CSVv2[i] > CSVv2M_working_point_76X and jetAK4_Pt[i] > 70 and abs(jetAK4_Eta[i]) < 2.5){
             number_bjets = number_bjets + 1;
             local_btag_index = i;
-        } else if( jetAK4_Pt[i] > 30 and jetAK4_CSVv2[i] < .5){
+        } else if( jetAK4_Pt[i] > 30 and jetAK4_CSVv2[i] < CSVv2M_working_point_76X){
             other_jets = true;
         }
     }
@@ -177,7 +178,7 @@ bool B2GTTree_cut_and_count::Signal(Long64_t jentry){
     }
 
     //transverse mass
-    if(return_mTW() > 50 and exactly_one_bjet == true /*and other_jets == falsei*/){
+    if(return_mTW() > 50 and exactly_one_bjet == true and other_jets == false){
         mTW_above_50 = true;
         Signal_cutflow[3].iterate();
     }
@@ -204,17 +205,60 @@ bool B2GTTree_cut_and_count::Signal(Long64_t jentry){
 
 bool B2GTTree_cut_and_count::WJet(Long64_t jentry){
     bool keep_event = false;
-    if( mu_Pt[0] > 10){
+    bool high_pt_not_bjet = false;
+    bool other_jet = false;
+
+
+    WJet_cutflow[0].iterate();
+    int number_selected_jets = 0;
+    for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+        if(jetAK4_Pt[i] > 70 and jetAK4_CSVv2[i] < CSVv2M_working_point_76X and abs(jetAK4_Eta[i]) < 2.5){
+            number_selected_jets = number_selected_jets + 1;
+        }else if( jetAK4_Pt[i] > 30 and abs(jetAK4_Eta[i]) < 2.5){
+            other_jet = true;
+        }
+
+    }
+
+    if( number_selected_jets == 1){
+        high_pt_not_bjet = true;
+        WJet_cutflow[1].iterate();
+    }
+    if(high_pt_not_bjet and other_jet == false){
+        WJet_cutflow[2].iterate();
         keep_event = true;
     }
+
+
     return keep_event;
 }
 
 bool B2GTTree_cut_and_count::TTBar(Long64_t jentry){
     bool keep_event = false;
-    if( mu_Pt[0] > 10){
+    bool two_bjets = false;
+    bool leading_jet_pt = false;
+
+    int local_num_bjets = 0;
+    TTBar_cutflow[0].iterate();
+     for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+         if(jetAK4_Pt[i] > 30 and jetAK4_CSVv2[i] > CSVv2M_working_point_76X and abs(jetAK4_Eta[i]) < 2.5){
+            local_num_bjets = local_num_bjets + 1;
+            if( jetAK4_Pt[i] > 70){
+                leading_jet_pt = true;
+            }
+         }
+     }
+
+    if( local_num_bjets == 2){
+        two_bjets = true;
+        TTBar_cutflow[1].iterate();
+    }
+    if( two_bjets and leading_jet_pt){
+        TTBar_cutflow[2].iterate();
         keep_event = true;
     }
+
+
     return keep_event;
 }
 
