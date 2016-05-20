@@ -80,7 +80,7 @@ bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
     bool transvers_mass_cut = false;
 
     //no other leptons  NOT COMPLETED!!!!!!!!! work and shit
-    for(int i = 1; i < sizeof(mu_Pt)/sizeof(mu_Pt[0]); i++){
+    for(int i = 1; i < mu_size; i++){
         if(mu_Pt[i] > 33 and abs(mu_Eta[i]) < 2.1 and mu_Iso04[i] < .12 and no_other_muon_electron){
             no_other_muon_electron = false;
            // std::cout << mu_Pt[i] << std::endl;
@@ -88,7 +88,7 @@ bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
     }
 
     //no other leptons  NOT COMPLETED!!!!!!!!! work and shit
-    for(int i = 0; i < sizeof(el_Pt)/sizeof(el_Pt[0]); i++){
+    for(int i = 0; i < el_size; i++){
         if(el_Pt[i] > 20 and abs(el_Eta[i]) < 2.5 and el_Iso03[i] < .20 and no_other_muon_electron){
             no_other_muon_electron = false;
             //std::cout << el_Pt[i] << std::endl;
@@ -109,7 +109,7 @@ bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
         int jet_count = 0;
         int bjet_count = 0;
         btag_index = -10;
-        for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+        for(int i = 0; i < jetAK4_size; i++){
     //        if( jetAK4_CSVv2[i] > .5 and jetAK4_Pt[i] > 30 and abs(jetAK4_Eta[i]) < 2.5){
             if( jetAK4_Pt[i] > 70 and abs(jetAK4_Eta[i]) < 2.4){ 
                 jet_count = jet_count + 1;
@@ -158,7 +158,7 @@ bool B2GTTree_cut_and_count::Signal(Long64_t jentry){
     int local_btag_index = -10;
     //jet cuts
     int number_bjets = 0;
-    for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+    for(int i = 0; i < jetAK4_size; i++){
         if(jetAK4_CSVv2[i] > CSVv2M_working_point_76X and jetAK4_Pt[i] > 70 and abs(jetAK4_Eta[i]) < 2.5){
             number_bjets = number_bjets + 1;
             local_btag_index = i;
@@ -211,7 +211,7 @@ bool B2GTTree_cut_and_count::WJet(Long64_t jentry){
 
     WJet_cutflow[0].iterate();
     int number_selected_jets = 0;
-    for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+    for(int i = 0; i < jetAK4_size; i++){
         if(jetAK4_Pt[i] > 70 and jetAK4_CSVv2[i] < CSVv2M_working_point_76X and abs(jetAK4_Eta[i]) < 2.5){
             number_selected_jets = number_selected_jets + 1;
         }else if( jetAK4_Pt[i] > 30 and abs(jetAK4_Eta[i]) < 2.5){
@@ -240,7 +240,7 @@ bool B2GTTree_cut_and_count::TTBar(Long64_t jentry){
 
     int local_num_bjets = 0;
     TTBar_cutflow[0].iterate();
-     for(int i = 0; i < sizeof(jetAK4_Eta)/sizeof(jetAK4_Eta[0]); i++){
+     for(int i = 0; i < jetAK4_size; i++){
          if(jetAK4_Pt[i] > 30 and jetAK4_CSVv2[i] > CSVv2M_working_point_76X and abs(jetAK4_Eta[i]) < 2.5){
             local_num_bjets = local_num_bjets + 1;
             if( jetAK4_Pt[i] > 70){
