@@ -2,7 +2,7 @@
 
 void plot_wjets_with_cuts(){
 
-    B2GTTree_cut_and_count m;
+    B2GTTree_cut_and_count m ( 0 ,"B2GTTreentuple_MC_25ns_76X_Monotop_S1_Mres-1100_Mchi-100_TuneCUETP8M1_13TeV-madgraph-pythia8_10k.root");
     //initilze cutflow for precut
     m.Precut_cutflow.push_back(cut_flow_count("all events wjet"));
     m.Precut_cutflow.push_back(cut_flow_count("eactly one muon"));

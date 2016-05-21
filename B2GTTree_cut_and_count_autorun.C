@@ -42,8 +42,9 @@ void B2GTTree_cut_and_count::Loop()
       // if (Cut(ientry) < 0) continue;
     //std::cout << mu_Pt[0] << std::endl;
     //
-    if(Precut(jentry)){
+    if(1==1){//Precut(jentry)){
       //  std::cout << "passed Precut" << std::endl;
+        std::cout << met_uncorPt[0] << std::endl;
         fill_plots(PreCut_analysis_plots);
         if( Signal(jentry)){
             fill_plots(Signal_analysis_plots);
@@ -78,6 +79,7 @@ bool B2GTTree_cut_and_count::Precut(Long64_t jentry){
     bool muon_cut = false;
     bool jet_cut = false;
     bool transvers_mass_cut = false;
+
 
     //no other leptons  NOT COMPLETED!!!!!!!!! work and shit
     for(int i = 1; i < mu_size; i++){

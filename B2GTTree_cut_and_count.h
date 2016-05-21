@@ -1875,13 +1875,14 @@ public :
    TBranch        *b_mu_SubjetV3PtRel;   //!
 
    B2GTTree_cut_and_count(TTree *tree=0);
+   B2GTTree_cut_and_count(TTree *tree=0, std::string filename = "B2GTTreeNtupleExtra_MC_25ns_76X.root");
    virtual ~B2GTTree_cut_and_count();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
    virtual void     Init(TTree *tree);
    virtual void     Loop();
-
+ 
    UInt_t           btag_index; //doesn't really work
 
    void             fill_plots(analysis_plots* analysis_plot_struct); 
@@ -1933,6 +1934,7 @@ void B2GTTree_cut_and_count::print_cutflow(std::vector<cut_flow_count> cutflow){
 
 void B2GTTree_cut_and_count::fill_plots(analysis_plots* analysis_plot_struct){
     analysis_plot_struct->muon_pt->Fill(mu_Pt[0]);
+    analysis_plot_struct->MET_pt->Fill(met_Pt[0]);
 }
 
 void B2GTTree_cut_and_count::Draw_plots(analysis_plots* analysis_plot_struct){
@@ -1941,6 +1943,11 @@ void B2GTTree_cut_and_count::Draw_plots(analysis_plots* analysis_plot_struct){
 
     analysis_plot_struct->muon_pt->Draw();
     temp_name = analysis_plot_struct->muon_pt->GetName();
+    temp_name = temp_name + "_" + analysis_plot_struct->cut_name + ".png"; 
+    c1->SaveAs(temp_name.c_str());
+
+    analysis_plot_struct->MET_pt->Draw();
+    temp_name = analysis_plot_struct->MET_pt->GetName();
     temp_name = temp_name + "_" + analysis_plot_struct->cut_name + ".png"; 
     c1->SaveAs(temp_name.c_str());
 }
@@ -1963,6 +1970,23 @@ B2GTTree_cut_and_count::B2GTTree_cut_and_count(TTree *tree) : fChain(0)
    Init(tree);
 }
 
+B2GTTree_cut_and_count::B2GTTree_cut_and_count(TTree *tree, std::string filename) : fChain(0) 
+{
+// if parameter tree is not specified (or zero), connect the file
+// used to generate this class and read the Tree.
+   if (tree == 0) {
+    
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(filename.c_str());
+      if (!f || !f->IsOpen()) {
+         f = new TFile(filename.c_str());
+      }
+      filename = filename + ":/B2GTTreeMaker";
+      TDirectory * dir = (TDirectory*)f->Get(filename.c_str());
+      dir->GetObject("B2GTree",tree);
+
+   }
+   Init(tree);
+}
 B2GTTree_cut_and_count::~B2GTTree_cut_and_count()
 {
    if (!fChain) return;
